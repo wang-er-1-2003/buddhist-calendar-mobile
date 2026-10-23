@@ -2,8 +2,6 @@
 node_modules/
 
 # 构建产物（体积大、可重新生成，不需要上传）
-*.apk
-*.exe
 *.7z
 *.dmg
 
