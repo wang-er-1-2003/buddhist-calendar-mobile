@@ -1,0 +1,1 @@
+{"name":"buddhist-calendar-android","version":"1.0.0","private":true,"dependencies":{"@capacitor/android":"^8.5.3","@capacitor/calendar":"^1.0.1","@capacitor/cli":"^8.5.3","@capacitor/core":"^8.5.3","lunar-javascript":"^1.7.7"}}

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>佛教三系节日历 2020-2040</title>
+<style>
+  :root {
+    --bg: #16110d;
+    --bg2: #201912;
+    --card: #241c14;
+    --card2: #2b2218;
+    --gold: #c9a86a;
+    --gold2: #e8cf9a;
+    --text: #e8e0d0;
+    --dim: #a99f8d;
+    --line: #3a3023;
+    --red: #b0524a;
+    --red2: #d06a60;
+    --green: #5d8a5f;
+    --blue: #5a7d9a;
+    --c-han: #c9a86a;
+    --c-tib: #b0524a;
+    --c-south: #5d8a5f;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(1200px 600px at 70% -10%, #241c14 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  #app { height: 100vh; display: flex; flex-direction: column; }
+
+  /* ===== 顶栏 ===== */
+  header {
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px 26px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(201,168,106,0.06), transparent);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .wheel {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: var(--gold2); background: rgba(201,168,106,0.08);
+  }
+  .brand h1 { font-size: 19px; font-weight: 600; letter-spacing: 2px; color: var(--gold2); }
+  .brand .sub { font-size: 12px; color: var(--dim); margin-top: 2px; letter-spacing: 1px; }
+
+  .year-ctrl { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .year-ctrl .btn {
+    width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); font-size: 16px; cursor: pointer;
+    transition: all .15s;
+  }
+  .year-ctrl .btn:hover { background: var(--card2); border-color: var(--gold); color: var(--gold2); }
+  .year-ctrl .btn:active { transform: scale(.94); }
+  .year-display {
+    min-width: 120px; text-align: center; font-size: 22px; font-weight: 700;
+    color: var(--gold2); letter-spacing: 3px;
+  }
+  .year-display small { display: block; font-size: 11px; color: var(--dim); letter-spacing: 2px; font-weight: 400; }
+
+  /* ===== 顶部佛历/天数信息条 ===== */
+  .info-strip { padding: 6px 26px 0; }
+  .info-line { font-size: 12.5px; color: #7a6f58; line-height: 1.8; }
+  .info-line b { color: var(--gold2); font-weight: 600; }
+  .info-line .dim2 { color: #5f5647; }
+  .info-line .sep { margin: 0 8px; color: #423a2d; }
+  .info-line small { font-size: 11px; color: #6a5f4c; }
+  .cal-info { margin-bottom: 2px; }
+  .cal-info summary { cursor: pointer; color: var(--dim); font-size: 12px; outline: none; padding: 2px 0; }
+  .cal-info .info-line { padding-left: 4px; }
+
+  /* ===== 系统切换 ===== */
+  .tabs {
+    display: flex; gap: 6px; padding: 6px 26px 0;
+  }
+  .tab {
+    padding: 9px 22px; border-radius: 10px 10px 0 0; cursor: pointer;
+    font-size: 14px; letter-spacing: 1px; color: var(--dim);
+    border: 1px solid transparent; border-bottom: none;
+    transition: all .15s; position: relative; top: 1px;
+  }
+  .tab .tag { font-size: 11px; opacity: .75; margin-left: 6px; }
+  .tab:hover { color: var(--text); }
+  .tab.active { background: var(--bg2); border-color: var(--line); color: var(--gold2); font-weight: 600; }
+  .tab.active::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--gold);
+  }
+  .tab.t-han.active { color: var(--c-han); } .tab.t-han.active::after { background: var(--c-han); }
+  .tab.t-tib.active { color: var(--c-tib); } .tab.t-tib.active::after { background: var(--c-tib); }
+  .tab.t-south.active { color: var(--c-south); } .tab.t-south.active::after { background: var(--c-south); }
+
+  /* ===== 荟供日开关 ===== */
+  .huiyog-toggle {
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 4px 16px; font-size: 11px; color: var(--dim);
+    background: rgba(201,168,106,0.04); border-bottom: 1px solid var(--line);
+  }
+  .toggle-item { display: flex; align-items: center; gap: 6px; }
+  .switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: #4a3f2e; border-radius: 20px; transition: .2s;
+  }
+  .slider::before {
+    content: ''; position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px;
+    background: var(--dim); border-radius: 50%; transition: .2s;
+  }
+  .switch input:checked + .slider { background: rgba(201,168,106,.3); }
+  .switch input:checked + .slider::before { transform: translateX(16px); background: var(--gold2); }
+
+  /* ===== 主体 ===== */
+  main { flex: 1; overflow-y: auto; padding: 18px 26px 40px; }
+
+  /* ===== 自定义滚动条（金色主题，作用于 main / 详情面板等所有滚动容器） ===== */
+  * { scrollbar-width: thin; scrollbar-color: #a8863f rgba(201,168,106,.08); }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-track { background: rgba(201,168,106,.07); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #d9ba7a, #a8863f);
+    border-radius: 10px;
+    border: 2px solid rgba(24,20,12,.55);
+    box-shadow: inset 0 0 3px rgba(255,235,190,.35);
+    transition: background .2s ease;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #ecd39a, #c9a86a);
+    box-shadow: inset 0 0 3px rgba(255,235,190,.45), 0 0 10px rgba(201,168,106,.45);
+  }
+  ::-webkit-scrollbar-thumb:active { background: linear-gradient(180deg, #e2c486, #9a7433); }
+  ::-webkit-scrollbar-corner { background: transparent; }
+
+  .cal-desc { font-size: 12.5px; color: var(--dim); margin-bottom: 14px; line-height: 1.7; }
+  .cal-desc b { color: var(--gold2); font-weight: 600; }
+
+  .month-block { margin-bottom: 26px; }
+  .month-head {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  }
+  .month-head .m {
+    font-size: 15px; font-weight: 700; color: var(--gold2); letter-spacing: 2px;
+    padding: 5px 14px; border: 1px solid var(--line); border-radius: 8px;
+    background: linear-gradient(180deg, rgba(201,168,106,0.10), rgba(201,168,106,0.02));
+  }
+  .month-head .rule { flex: 1; height: 1px; background: var(--line); }
+
+  .fest-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+  .fest {
+    background: linear-gradient(160deg, var(--card), var(--bg2));
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start;
+    transition: border-color .15s, transform .15s;
+  }
+  .fest:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .fest .date-box {
+    min-width: 64px; text-align: center; padding: 7px 6px;
+    border-radius: 8px; background: rgba(0,0,0,0.25);
+    border: 1px solid var(--line);
+  }
+  .fest .date-box .d { font-size: 22px; font-weight: 700; color: var(--gold2); line-height: 1.1; }
+  .fest .date-box .m { font-size: 11px; color: var(--dim); margin-top: 2px; }
+  .fest .date-box .w { font-size: 10px; color: var(--dim); margin-top: 1px; }
+  .fest .info { flex: 1; min-width: 0; }
+  .fest .info .name { font-size: 14.5px; font-weight: 600; color: var(--text); line-height: 1.35; }
+  .fest .info .lunar { font-size: 12px; color: var(--dim); margin-top: 3px; }
+  .fest .info .note { font-size: 11px; color: #8a7f6b; margin-top: 4px; line-height: 1.5; }
+  .fest .info .src { font-size: 10.5px; color: #6f6655; margin-top: 3px; }
+
+  .fest .badge { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 20px; margin-left: 6px; vertical-align: 1px; }
+  .badge.official { background: rgba(93,138,95,0.18); color: #8fbf92; border: 1px solid rgba(93,138,95,0.4); }
+  .badge.calc { background: rgba(201,168,106,0.14); color: var(--gold2); border: 1px solid rgba(201,168,106,0.35); }
+
+  /* 三系合一视图 */
+  .fest.sys-han { border-left: 3px solid var(--c-han); }
+  .fest.sys-tib { border-left: 3px solid var(--c-tib); }
+  .fest.sys-south { border-left: 3px solid var(--c-south); }
+  .sys-tag {
+    display: inline-block; font-size: 10px; padding: 1px 8px; border-radius: 4px;
+    margin-right: 7px; vertical-align: 1px; letter-spacing: 1px; font-weight: 600;
+  }
+  .sys-tag.han { background: rgba(201,168,106,0.16); color: var(--c-han); border: 1px solid rgba(201,168,106,0.4); }
+  .sys-tag.tib { background: rgba(176,82,74,0.18); color: #d97a6e; border: 1px solid rgba(176,82,74,0.45); }
+  .sys-tag.south { background: rgba(93,138,95,0.18); color: #8fbf92; border: 1px solid rgba(93,138,95,0.45); }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+  .filter-chip {
+    font-size: 12px; padding: 4px 14px; border-radius: 20px; cursor: pointer;
+    border: 1px solid var(--line); color: var(--dim); background: var(--card);
+    transition: all .15s; user-select: none;
+  }
+  .filter-chip:hover { border-color: var(--gold); }
+  .filter-chip.on { font-weight: 600; }
+  .filter-chip.on.f-han { color: var(--c-han); border-color: var(--c-han); background: rgba(201,168,106,0.08); }
+  .filter-chip.on.f-tib { color: #d97a6e; border-color: var(--c-tib); background: rgba(176,82,74,0.10); }
+  .filter-chip.on.f-south { color: #8fbf92; border-color: var(--c-south); background: rgba(93,138,95,0.10); }
+  .overlap-note { font-size: 11.5px; color: var(--dim); margin-left: 6px; }
+  .overlap-note b { color: var(--gold2); }
+
+  /* 节日详情面板 */
+  .fest { cursor: pointer; transition: transform .12s, border-color .12s; }
+  .fest:hover { transform: translateY(-1px); border-color: var(--gold); }
+  .detail-mask {
+    position: fixed; inset: 0; background: rgba(0,0,0,.62); z-index: 50;
+    display: none; align-items: center; justify-content: center; padding: 24px;
+  }
+  .detail-mask.open { display: flex; }
+  .detail-panel {
+    background: #201913; border: 1px solid var(--line); border-radius: 14px;
+    max-width: 640px; width: 100%; max-height: 86vh; overflow-y: auto;
+    padding: 22px 26px 18px; position: relative; box-shadow: 0 12px 48px rgba(0,0,0,.5);
+  }
+  .detail-close {
+    position: absolute; top: 12px; right: 16px; font-size: 20px; color: var(--dim);
+    cursor: pointer; background: none; border: none; padding: 4px 8px; line-height: 1;
+  }
+  .detail-close:hover { color: var(--gold2); }
+  .detail-panel h2 { margin: 0 0 4px; font-size: 20px; color: var(--gold2); }
+  .detail-sys { font-size: 11px; color: var(--dim); margin-bottom: 8px; }
+  .detail-img { width: 100%; max-width: 220px; aspect-ratio: 3/4; object-fit: cover; border-radius: 10px; margin: 0 auto 12px; display: block; border: 1px solid rgba(201,168,106,.25); }
+  .detail-names { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 14px; }
+  .detail-names span {
+    font-size: 11.5px; padding: 3px 10px; border-radius: 14px;
+    background: rgba(201,168,106,.10); color: var(--gold2); border: 1px solid rgba(201,168,106,.28);
+  }
+  .detail-panel h3 {
+    font-size: 13px; color: var(--gold); margin: 14px 0 6px;
+    padding-bottom: 4px; border-bottom: 1px solid rgba(201,168,106,.15);
+    letter-spacing: 1px;
+  }
+  .detail-panel p { font-size: 13px; line-height: 1.75; color: #e8d9bd; margin: 6px 0; }
+  .detail-panel ul { margin: 6px 0; padding-left: 18px; }
+  .detail-panel li { font-size: 12.5px; line-height: 1.7; color: #e0cfae; margin: 3px 0; }
+  .detail-panel ul.detail-quotes li {
+    font-size: 12.5px; line-height: 1.75; color: #d9c9a4; font-style: italic;
+    border-left: 3px solid rgba(201,168,106,.45); background: rgba(201,168,106,.05);
+    margin: 8px 0; padding: 8px 12px; border-radius: 0 8px 8px 0; list-style: none;
+  }
+  .detail-rule { font-size: 12px; color: var(--dim); background: rgba(255,255,255,.04); border-radius: 8px; padding: 6px 10px; display: inline-block; }
+  .detail-src { margin-top: 16px; font-size: 11px; color: #8d7d63; border-top: 1px dashed rgba(201,168,106,.25); padding-top: 10px; }
+  .cal-add {
+    display: block; width: 100%; margin-top: 12px; padding: 10px;
+    background: rgba(201,168,106,.15); color: var(--gold2);
+    border: 1px solid rgba(201,168,106,.4); border-radius: 8px;
+    font-size: 13px; cursor: pointer; text-align: center;
+  }
+  .cal-add:active { background: rgba(201,168,106,.3); }
+
+  /* 空态 */
+  .empty { color: var(--dim); text-align: center; padding: 60px 0; font-size: 13px; }
+
+  /* 底部来源 */
+  footer {
+    border-top: 1px solid var(--line); padding: 10px 26px;
+    font-size: 11px; color: #6f6655; background: rgba(0,0,0,0.2);
+  }
+  footer b { color: var(--dim); }
+  footer details { font-size: 11px; color: #6f6655; }
+  footer summary { cursor: pointer; color: var(--dim); outline: none; }
+  footer details p { margin: 6px 0 0; line-height: 1.7; }
+
+  /* ===== 手机窄屏适配 ===== */
+  @media (max-width: 600px) {
+    header { padding: 10px 12px; flex-wrap: nowrap; }
+    .brand { gap: 8px; }
+    .brand .wheel { width: 26px; height: 26px; font-size: 12px; }
+    .brand h1 { font-size: 15px; letter-spacing: 1px; white-space: nowrap; }
+    .brand .sub { font-size: 10px; letter-spacing: 0; }
+    .year-ctrl { gap: 6px; }
+    .year-ctrl .btn { width: 28px; height: 28px; font-size: 14px; }
+    .year-display { min-width: 80px; font-size: 18px; letter-spacing: 1px; }
+    .year-display small { font-size: 9px; }
+    .info-strip { padding: 6px 12px 0; }
+    .info-line { font-size: 11px; line-height: 1.7; }
+    .info-line small { font-size: 9.5px; }
+    .tabs { padding: 6px 12px 0; gap: 4px; }
+    .tab { padding: 7px 10px; font-size: 12px; letter-spacing: 0; white-space: nowrap; }
+    .tab .tag { display: none; }
+    .fest .badge { display: none; }
+    main { padding: 10px 12px; }
+    .day { padding: 8px; }
+    .day .date { font-size: 11px; }
+    .day .fname { font-size: 12px; }
+    .detail-panel { padding: 16px 14px; max-width: 100%; }
+    .detail-panel h2 { font-size: 17px; }
+    .detail-img { max-width: 160px; }
+    footer { padding: 8px 12px; font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">
+      <div class="wheel">☸</div>
+      <div>
+        <h1>佛教三系节日历</h1>
+        <div class="sub">汉传 · 藏传 · 南传 &nbsp;|&nbsp; 2020 – 2040</div>
+      </div>
+    </div>
+    <div class="year-ctrl">
+      <button class="btn" id="prevYear">‹</button>
+      <div class="year-display"><span id="yearNum">2026</span><small id="yearNote"></small></div>
+      <button class="btn" id="nextYear">›</button>
+    </div>
+  </header>
+
+  <div class="info-strip">
+    <details class="cal-info">
+      <summary>佛历对照（南传/汉传/藏历/傣历）</summary>
+      <div class="info-line" id="infoSouth"></div>
+      <div class="info-line" id="infoHan"></div>
+      <div class="info-line" id="infoTib"></div>
+      <div class="info-line" id="infoDai"></div>
+    </details>
+    <div class="info-line" id="infoDays"></div>
+    <div class="info-line" id="infoBreakdown"></div>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <div class="tab t-all active" data-sys="all">三系合一<span class="tag">合并视图</span></div>
+    <div class="tab t-han" data-sys="han">汉传佛教<span class="tag">农历</span></div>
+    <div class="tab t-tib" data-sys="tibetan">藏传佛教<span class="tag">浦巴派时轮历</span></div>
+    <div class="tab t-south" data-sys="south">南传佛教<span class="tag">版纳小傣历</span></div>
+  </nav>
+  <div class="huiyog-toggle" id="huiyogToggle">
+    <div class="toggle-item"><span>荟供日（藏传）</span>
+    <label class="switch"><input type="checkbox" id="huiyogSwitch" checked><span class="slider"></span></label></div>
+    <div class="toggle-item"><span>布萨日（南传）</span>
+    <label class="switch"><input type="checkbox" id="uposathaSwitch" checked><span class="slider"></span></label></div>
+    <div class="toggle-item"><span>斋日（汉传）</span>
+    <label class="switch"><input type="checkbox" id="zhaiSwitch" checked><span class="slider"></span></label></div>
+  </div>
+
+  <main id="main"></main>
+
+  <footer>
+    <details>
+      <summary><b>数据来源</b>（点击展开）</summary>
+      <p>汉传＝lunar-javascript 1.7.7（六特尔，农历固定30节）；
+      藏传＝kalacakra.org 浦巴派时轮历600年逐日数据（phugpa pl_1450–2049）；
+      南传＝傣历（祖腊历）算法推算 + 官方锚点校准：2026年关门节7月29日（云南省委统战部）、2024年7月20日（澎湃田野笔记）、泼水节4月13–15日（1987年西双版纳州人大常委会立法）。
+      南传逐年日期为推算值，如与官方历书冲突以官方为准。</p>
+    </details>
+  </footer>
+</div>
+
+<!-- 节日详情面板 -->
+<div class="detail-mask" id="detailMask">
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<script>
+const CN_NUM = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
+const WEEK = ['日','一','二','三','四','五','六'];
+const SYS_META = {
+  all:    { name: '三系合一', cal: '合并视图', color: '#c9a86a',
+            desc: '同一年份下，汉传 / 藏传 / 南传三系节日按公历日期合并显示，彩色标签区分体系，可点击筛选。' },
+  han:    { name: '汉传佛教', cal: '农历', color: '#c9a86a',
+            desc: '30 个佛教节日按农历固定日期计算，涵盖佛菩萨圣诞、成道日、出家日、涅槃日等。' },
+  tibetan:{ name: '藏传佛教', cal: '藏历（浦巴派时轮历 Phugpa）', color: '#b0524a',
+            desc: '按浦巴派时轮历月日，自 kalacakra.org 600 年逐日数据（pl_1450–2049）提取：洛萨、神变节、佛诞、萨嘎达瓦、转法轮节、佛入母胎、天降节；另据中国西藏网·央视网等补燃灯节（藏历十月廿五）、仙女节（藏历十月十五）、雪顿节（藏历六月三十）、酥油花灯节（藏历正月十五）、传昭大法会（藏历一月初四）。' },
+  south:  { name: '南传佛教', cal: '版纳小傣历（祖腊历 Chula Sakarat）', color: '#5d8a5f',
+            desc: '傣历月号＝泰历（CS）月号+1，傣历闰九月＝泰历闰八月。关键日期经官方锚点校准（2026年关门节7月29日＝傣历1388年闰九月十五，云南省委统战部确认）。' }
+};
+const SYS_SHORT = { han: '汉传', tibetan: '藏传', south: '南传' };
+const SYS_CLS = { han: 'han', tibetan: 'tib', south: 'south' };
+
+let data = null;
+let details = null;
+let sys = 'all';
+let year = 2026;
+const sysFilter = { han: true, tibetan: true, south: true };
+
+const $ = id => document.getElementById(id);
+
+// 详情面板
+const SYS_NAME = { han: '汉传佛教', tibetan: '藏传佛教', south: '南传佛教' };
+function findDetail(sysKey, name) {
+  const d = details && details[sysKey];
+  if (!d) return null;
+  const primary = name.split('／')[0].split('（')[0].trim();
+  if (d[primary]) return d[primary];
+  const k = Object.keys(d).find(k2 => k2.startsWith(primary) || primary.startsWith(k2));
+  return k ? d[k] : null;
+}
+// 节日配图映射（按名称关键词匹配，文件名在 images/ 目录）
+const IMG_MAP = [
+  { keys: ['观音'], img: 'images/han_guanyin.png' },
+  { keys: ['阿弥陀'], img: 'images/han_amitabha.png' },
+  { keys: ['药师'], img: 'images/han_bhaishajyaguru.png' },
+  { keys: ['地藏'], img: 'images/han_kshitigarbha.png' },
+  { keys: ['文殊'], img: 'images/han_manjushri.png' },
+  { keys: ['弥勒'], img: 'images/han_maitreya.png' },
+  { keys: ['普贤'], img: 'images/han_samantabhadra.png' },
+  { keys: ['韦驮', '韦陀'], img: 'images/han_skanda.png' },
+  { keys: ['伽蓝', '关公'], img: 'images/han_sangharama.png' },
+  { keys: ['大势至'], img: 'images/han_mahasthamaprapta.png' },
+  { keys: ['准提'], img: 'images/han_cundi.png' },
+  { keys: ['佛欢喜', '盂兰盆', '目连'], img: 'images/han_ullambana.png' },
+  { keys: ['月光'], img: 'images/han_candra.png' },
+  { keys: ['日光'], img: 'images/han_surya.png' },
+  { keys: ['龙树'], img: 'images/han_nagarjuna.png' },
+  { keys: ['达摩'], img: 'images/han_bodhidharma.png' },
+  { keys: ['药王'], img: 'images/han_bhaishayaraja.png' },
+  { keys: ['摩利支天'], img: 'images/han_marici.png' },
+  { keys: ['监斋', '紧那罗'], img: 'images/han_kinara.png' },
+  { keys: ['华严'], img: 'images/han_vairocana.png' },
+  { keys: ['定光佛', '燃灯佛', '燃灯古佛'], img: 'images/han_dipankara.png' },
+  { keys: ['卫塞', '佛吉祥日', 'Vesak'], img: 'images/han_vesak.png' },
+  { keys: ['释迦牟尼', '佛诞', '萨嘎达瓦', '转法轮'], img: 'images/tibetan_sakyamuni.png' },
+  { keys: ['燃灯节', '宗喀巴'], img: 'images/tibetan_tsongkhapa.png' },
+  { keys: ['仙女节', '吉祥天母'], img: 'images/tibetan_paldenlhamo.png' },
+  { keys: ['藏历新年'], img: 'images/tibetan_losar.png' },
+  { keys: ['酥油花灯'], img: 'images/tibetan_butterlamp.png' },
+  { keys: ['雪顿节'], img: 'images/tibetan_shoton.png' },
+  { keys: ['传昭'], img: 'images/tibetan_monlam.png' },
+  { keys: ['佛入母胎'], img: 'images/tibetan_descent.png' },
+  { keys: ['天降节'], img: 'images/tibetan_lhabab.png' },
+  { keys: ['桑堪比迈', '泼水节'], img: 'images/south_songkran.png' },
+  { keys: ['浴佛节'], img: 'images/south_bathing.png' },
+  { keys: ['豪瓦萨', '奥瓦萨', '关门节', '开门节'], img: 'images/south_pavarana.png' },
+  { keys: ['药师佛殊胜'], img: 'images/tibetan_bhaishajya.png' },
+  { keys: ['莲师荟供'], img: 'images/tibetan_guru.png' },
+  { keys: ['度母荟供'], img: 'images/tibetan_tara.png' },
+  { keys: ['空行母荟供'], img: 'images/tibetan_dakini.png' },
+  { keys: ['护法荟供'], img: 'images/tibetan_mahakala.png' },
+  { keys: ['月晦日'], img: 'images/tibetan_vajrasattva.png' },
+  { keys: ['月望日'], img: 'images/tibetan_sakyamuni.png' },
+  { keys: ['古突'], img: 'images/tibetan_losar.png' },
+  { keys: ['布萨日'], img: 'images/south_uposatha.png' },
+  { keys: ['六斋日', '十斋日'], img: 'images/han_zhai.png' }
+];
+function getImg(name) {
+  for (const m of IMG_MAP) if (m.keys.some(k => name.includes(k))) return m.img;
+  return null;
+}
+
+function openDetail(f) {
+  const det = findDetail(f._sys, f.name);
+  if (!det) return;
+  const sysName = SYS_NAME[f._sys] || '';
+  const img = getImg(det.names[0]) || getImg(f.name);
+  let html = `<button class="detail-close" id="detailClose">✕</button>
+    <h2>${det.names[0]}</h2>
+    <div class="detail-sys">${sysName} · ${det.dateRule}</div>
+    ${img ? `<img class="detail-img" src="${img}" alt="${det.names[0]}">` : ''}
+    <div class="detail-names">${det.names.map(n => `<span>${n}</span>`).join('')}</div>
+    <h3>背景缘起</h3><p>${det.background}</p>
+    <h3>传统习俗</h3><ul>${det.customs.map(c => `<li>${c}</li>`).join('')}</ul>
+    ${det.folk && det.folk.length ? `<h3>民间民俗</h3><ul>${det.folk.map(c => `<li>${c}</li>`).join('')}</ul>` : ''}
+    ${det.fahui && det.fahui.length ? `<h3>寺院法会</h3><ul>${det.fahui.map(c => `<li>${c}</li>`).join('')}</ul>` : ''}
+    <h3>小知识</h3><ul>${det.facts.map(c => `<li>${c}</li>`).join('')}</ul>
+    ${det.quotes && det.quotes.length ? `<h3>经典原文</h3><ul class="detail-quotes">${det.quotes.map(q => `<li>${q}</li>`).join('')}</ul>` : ''}
+    <h3>历史沿革</h3><p>${det.history}</p>
+    <div class="detail-src">来源：${det.source}</div>
+    ${f.date ? `<button class="cal-add" id="calAdd">📅 加入手机日历（${f.date}）</button>` : ''}`;
+  $('detailPanel').innerHTML = html;
+  requestAnimationFrame(() => { $('detailPanel').scrollTop = 0; });
+  $('detailMask').classList.add('open');
+  $('detailClose').addEventListener('click', closeDetail);
+  const calBtn = $('calAdd');
+  if (calBtn) calBtn.addEventListener('click', () => addToCalendar(f, det));
+}
+async function addToCalendar(f, det) {
+  try {
+    const { Calendar } = window.Capacitor?.Plugins || {};
+    if (!Calendar) { alert('当前环境不支持日历写入'); return; }
+    const d = new Date(f.date + 'T09:00:00');
+    const end = new Date(f.date + 'T10:00:00');
+    await Calendar.createEvent({
+      title: det.names[0],
+      location: '',
+      description: det.background.substring(0, 200),
+      startDate: d.toISOString(),
+      endDate: end.toISOString(),
+      isAllDay: true,
+    });
+    alert('已加入手机日历');
+  } catch (e) {
+    alert('写入失败：' + (e.message || e));
+  }
+}
+function closeDetail() {
+  $('detailMask').classList.remove('open');
+}
+
+function updateInfo() {
+  // —— 佛历四口径（口径与派系逐一标注）——
+  const southBE = year + 543;               // 南传上座部·佛灭纪元（泰国/老挝等主流口径）
+  const hanBE   = year + 1027;              // 汉传·佛诞纪元（周昭王二十四年甲寅·公元前1027年起算）
+  const GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+  const ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  const SX  = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
+  const WX  = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+  const gan = GAN[((year - 4) % 10 + 10) % 10], zhi = ZHI[((year - 4) % 12 + 12) % 12];
+  const sx  = SX[((year - 4) % 12 + 12) % 12];
+  const rabj = Math.floor((year - 1027) / 60) + 1;          // 第几绕迥（1027年=第一绕迥）
+  const rseq = ((year - 1027) % 60 + 60) % 60 + 1;          // 本绕迥内第几年
+  // —— 当年佛教节日天数（按公历日去重）——
+  const k = String(year);
+  const isFixed = note => note === '藏传每月固定荟供日' || note === '南传上座部四布萨日' || note === '汉传斋日';
+  const mergedBig = new Set(); const mergedAll = new Set();
+  const cntPair = a => {
+    if (!a) return [0,0];
+    const sAll = new Set(); const sBig = new Set();
+    a.forEach(x => {
+      const d = String(x.date).replace(/~.*/, '');
+      sAll.add(d); mergedAll.add(d);
+      if (!isFixed(x.note)) { sBig.add(d); mergedBig.add(d); }
+    });
+    return [sBig.size, sAll.size];
+  };
+  const [hBig, hAll] = cntPair(data && data.han && data.han[k]);
+  const [tBig, tAll] = cntPair(data && data.tibetan && data.tibetan[k]);
+  const [sBig, sAll] = cntPair(data && data.south && data.south[k]);
+  $('infoSouth').innerHTML = `南传佛历 <b>${southBE}</b> 年<br><small>（上座部·佛灭纪元，公历+543；柬/斯里兰卡部分+544）</small>`;
+  $('infoHan').innerHTML = `汉传佛历 <b>${hanBE}</b> 年<br><small>（佛诞纪元，周昭王廿四年甲寅·公元前1027起算，公历+1027）</small>`;
+  $('infoTib').innerHTML = `藏历 第<b>${rabj}</b>绕迥·${gan}${zhi}<br><small>（${WX[gan]}${sx}年；时轮历，1027年译《时轮经》为第一绕迥，本绕迥第${rseq}年）</small>`;
+  $('infoDai').innerHTML = `傣历 <b>${year - 638}</b> 年<br><small>（祖腊历·小傣历，公历-638）</small>`;
+  $('infoDays').innerHTML = `<b>${year} 年佛教节日</b>：大节日 <b>${mergedBig.size}</b> 天<span class="dim2">（含每月固定日共 ${mergedAll.size} 天）</span>`;
+  $('infoBreakdown').innerHTML = `汉传 <b>${hBig}</b> 天<span class="sep">｜</span>藏传 <b>${tBig}</b> 天<span class="sep">｜</span>南传 <b>${sBig}</b> 天<small>（大节日口径）</small><br><small>含每月固定日：汉传 <b>${hAll}</b> 天<span class="sep">｜</span>藏传 <b>${tAll}</b> 天<span class="sep">｜</span>南传 <b>${sAll}</b> 天</small>`;
+}
+
+function fmtDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const w = new Date(y, m - 1, d).getDay();
+  return { m, d, w, y };
+}
+
+function buildMonthBlocks(list) {
+  // 按公历月份分组
+  const groups = {};
+  for (const f of list) {
+    const m = f._m || 1;
+    (groups[m] = groups[m] || []).push(f);
+  }
+  return groups;
+}
+
+function badgeHtml(f) {
+  return (f.note || '').includes('官方') || (f.note || '').includes('确认') || (f.note || '').includes('立法')
+    ? '<span class="badge official">官方确证</span>'
+    : '<span class="badge calc">历法推算</span>';
+}
+
+// 三系合一筛选条：chip 状态跟随 sysFilter（全关也能看到并恢复）
+function filterRowHtml(overlapHtml) {
+  const chips = [['han', '汉传'], ['tibetan', '藏传'], ['south', '南传']]
+    .map(([k, name]) =>
+      `<span class="filter-chip ${sysFilter[k] ? 'on' : ''} f-${SYS_CLS[k]}" data-f="${k}">${name}</span>`
+    ).join('\n');
+  return `<div class="filter-row">${chips}${overlapHtml || ''}</div>`;
+}
+
+function render() {
+  const meta = SYS_META[sys];
+  $('yearNum').textContent = year;
+  $('yearNote').textContent = '公元 ' + year + ' 年';
+  updateInfo();
+
+  let showHuiyog = localStorage.getItem('huiyog') !== 'off';
+  let showUposatha = localStorage.getItem('uposatha') !== 'off';
+  let showZhai = localStorage.getItem('zhai') !== 'off';
+
+  let list = [];
+
+  if (sys === 'all') {
+    // 合并三系
+    for (const key of ['han', 'tibetan', 'south']) {
+      if (!sysFilter[key]) continue;
+      const yd = data && data[key] ? data[key][String(year)] : null;
+      if (!yd) continue;
+      for (const f of yd) {
+        if (!showHuiyog && f.note === '藏传每月固定荟供日') continue;
+        if (!showUposatha && f.note === '南传上座部四布萨日') continue;
+        if (!showZhai && f.note === '汉传斋日') continue;
+        const ds = f.date;
+        const k = ds.replace(/~.*/, '');
+        const fm = fmtDate(k);
+        list.push({ ...f, _key: k, _m: fm.m, _d: fm.d, _w: fm.w, _sys: key });
+      }
+    }
+    list.sort((a, b) => a._key < b._key ? -1 : a._key > b._key ? 1 : 0);
+  } else {
+    const yearData = data && data[sys] ? data[sys][String(year)] : null;
+    if (yearData) {
+      list = yearData.filter(f => (showHuiyog || f.note !== '藏传每月固定荟供日') && (showUposatha || f.note !== '南传上座部四布萨日') && (showZhai || f.note !== '汉传斋日')).map(f => {
+        const ds = f.date;
+        const k = ds.replace(/~.*/, '');
+        const fm = fmtDate(k);
+        return { ...f, _key: k, _m: fm.m, _d: fm.d, _w: fm.w };
+      }).sort((a, b) => a._key < b._key ? -1 : 1);
+    }
+  }
+
+  if (!list.length) {
+    // 空态：三系合一模式必须保留筛选条，否则用户无法重新打开
+    let emptyHtml = `<div class="cal-desc"><b>${meta.name}</b> · ${meta.cal}<br>${meta.desc}</div>`;
+    if (sys === 'all') {
+      emptyHtml += filterRowHtml();
+      emptyHtml += '<div class="empty">已关闭全部体系筛选 —— 点击上方「汉传 / 藏传 / 南传」重新打开</div>';
+    } else {
+      emptyHtml += '<div class="empty">该年份暂无数据</div>';
+    }
+    $('main').innerHTML = emptyHtml;
+    return;
+  }
+
+  const groups = buildMonthBlocks(list);
+
+  let html = `<div class="cal-desc"><b>${meta.name}</b> · ${meta.cal}<br>${meta.desc}</div>`;
+
+  // 三系合一：筛选条 + 重叠提示（仅统计跨体系重合）
+  if (sys === 'all') {
+    let overlapHtml = '';
+    if (list.length) {
+      const overlap = {};
+      for (const f of list) {
+        const k = f._sys || f.source || 'x';
+        (overlap[f._key] = overlap[f._key] || new Set()).add(k);
+      }
+      const multi = Object.keys(overlap).filter(k => overlap[k].size > 1);
+      if (multi.length) {
+        overlapHtml = `<span class="overlap-note">当日跨系重合：<b>${multi.length}</b> 天</span>`;
+      }
+    }
+    html += filterRowHtml(overlapHtml);
+  }
+
+  for (let m = 1; m <= 12; m++) {
+    const fs = groups[m];
+    if (!fs) continue;
+    html += `<div class="month-block">
+      <div class="month-head"><span class="m">${m} 月</span><div class="rule"></div></div>
+      <div class="fest-grid">`;
+    for (const f of fs) {
+      const sysTag = f._sys
+        ? `<span class="sys-tag ${SYS_CLS[f._sys]}">${SYS_SHORT[f._sys]}</span>`
+        : '';
+      const sysCls = f._sys ? ' sys-' + SYS_CLS[f._sys] : '';
+      const weekday = f._w !== undefined ? `周${WEEK[f._w]}` : '';
+      html += `<div class="fest${sysCls}" data-sys="${f._sys || sys}" data-name="${(f.name || '').replace(/"/g, '&quot;')}" data-date="${f.date || ''}">
+        <div class="date-box">
+          <div class="d">${f._d}</div>
+          <div class="m">${f._m}月</div>
+          <div class="w">${weekday}</div>
+        </div>
+        <div class="info">
+          <div class="name">${sysTag}${f.name}${badgeHtml(f)}</div>
+          <div class="lunar">${f.lunar || ''}</div>
+          <div class="note">${f.note || ''}</div>
+          <div class="src">${f.source || ''}</div>
+        </div>
+      </div>`;
+    }
+    html += `</div></div>`;
+  }
+  $('main').innerHTML = html;
+  $('main').scrollTop = 0;
+}
+
+// 初始化（双环境：Electron 走 preload 桥，WebView/浏览器走 fetch 本地 JSON）
+async function loadData() {
+  if (window.festivalApp && window.festivalApp.getData) {
+    return Promise.all([window.festivalApp.getData(), window.festivalApp.getDetails()]);
+  }
+  const [d, e] = await Promise.all([
+    fetch('data/festival_2020_2040.json').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+    fetch('data/festival_details.json').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  ]);
+  return [d, e];
+}
+(async function init() {
+  try {
+    [data, details] = await loadData();
+  } catch (e) {
+    $('main').innerHTML = '<div class="empty">数据加载失败：' + e.message + '</div>';
+    return;
+  }
+  // URL 参数（支持 ?sys=han|tibetan|south&year=2026）
+  const params = new URLSearchParams(location.search);
+  if (params.get('sys') && SYS_META[params.get('sys')]) sys = params.get('sys');
+  if (params.get('year')) {
+    const y = parseInt(params.get('year'), 10);
+    if (y >= 2020 && y <= 2040) year = y;
+  }
+  // 默认年份：当前年份（若在范围内）
+  const now = new Date();
+  if (now.getFullYear() >= 2020 && now.getFullYear() <= 2040 && !params.get('year')) year = now.getFullYear();
+
+  // 标签切换
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      sys = t.dataset.sys;
+      render();
+    });
+  });
+
+  // 荟供日开关
+  const huiSwitch = $('huiyogSwitch');
+  if (localStorage.getItem('huiyog') === 'off') huiSwitch.checked = false;
+  huiSwitch.addEventListener('change', () => {
+    localStorage.setItem('huiyog', huiSwitch.checked ? 'on' : 'off');
+    render();
+  });
+  const upoSwitch = $('uposathaSwitch');
+  if (localStorage.getItem('uposatha') === 'off') upoSwitch.checked = false;
+  upoSwitch.addEventListener('change', () => {
+    localStorage.setItem('uposatha', upoSwitch.checked ? 'on' : 'off');
+    render();
+  });
+  const zhaiSwitch = $('zhaiSwitch');
+  if (localStorage.getItem('zhai') === 'off') zhaiSwitch.checked = false;
+  zhaiSwitch.addEventListener('change', () => {
+    localStorage.setItem('zhai', zhaiSwitch.checked ? 'on' : 'off');
+    render();
+  });
+
+  // 三系合一：体系筛选（事件委托）
+  document.getElementById('main').addEventListener('click', e => {
+    const chip = e.target.closest('.filter-chip');
+    if (chip) {
+      if (sys !== 'all') return;
+      const k = chip.dataset.f;
+      sysFilter[k] = !sysFilter[k];
+      chip.classList.toggle('on', sysFilter[k]);
+      render();
+      return;
+    }
+    const card = e.target.closest('.fest');
+    if (card && card.dataset.sys && card.dataset.name) {
+      openDetail({ _sys: card.dataset.sys, name: card.dataset.name, date: card.dataset.date });
+    }
+  });
+
+  // 详情面板关闭：遮罩点击 / Esc
+  $('detailMask').addEventListener('click', e => { if (e.target.id === 'detailMask') closeDetail(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+  // 年份切换
+  $('prevYear').addEventListener('click', () => { if (year > 2020) { year--; render(); } });
+  $('nextYear').addEventListener('click', () => { if (year < 2040) { year++; render(); } });
+
+  // 键盘左右键
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft' && year > 2020) { year--; render(); }
+    if (e.key === 'ArrowRight' && year < 2040) { year++; render(); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

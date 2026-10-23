@@ -1,0 +1,22 @@
+# Node 依赖
+node_modules/
+
+# 构建产物（体积大、可重新生成，不需要上传）
+*.apk
+*.exe
+*.7z
+*.dmg
+
+# Capacitor / Android 构建与 IDE 文件
+android/build/
+android/app/build/
+android/.gradle/
+android/.kotlin/
+android/.idea/
+android/local.properties
+android/captures/
+
+# 运行调试输出
+out.txt
+out2.txt
+*.log
